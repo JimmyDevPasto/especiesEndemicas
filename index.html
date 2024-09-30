@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego de Memoria: Especies Endémicas</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!-- FontAwesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      .card {
+        perspective: 1000px;
+      }
+      .card-inner {
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+      }
+      .card.flipped .card-inner {
+        transform: rotateY(180deg);
+      }
+      .card-front,
+      .card-back {
+        backface-visibility: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 2px solid #333;
+      }
+      .card-front {
+        background-color: #ffcccb;
+      }
+      .card-back {
+        background-color: #ffde59;
+        transform: rotateY(180deg);
+      }
+      #discovered-species {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .discovered-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0.5rem;
+      }
+      .discovered-card img {
+        width: 80px;
+        height: 80px;
+      }
+      body {
+        background-image: url("../assets/background/fondo.jpg"); /* URL de fondo de animales */
+        background-size: cover;
+        background-position: center;
+        font-family: "insektofobiya", sans-serif;
+      }
+      #game-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Tres columnas en móviles */
+  gap: 0.5rem;
+  margin: 1rem auto;
+}
+
+@media (min-width: 768px) {
+  #game-board {
+    grid-template-columns: repeat(4, 1fr); /* Cuatro columnas en pantallas medianas */
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  #game-board {
+    grid-template-columns: repeat(6, 1fr); /* Seis columnas en pantallas grandes */
+    gap: 1rem;
+  }
+}
+
+.card {
+  width: 100px; /* Ajusta el tamaño de las tarjetas para móviles */
+  height: 150px;
+}
+
+@media (min-width: 768px) {
+  .card {
+    width: 120px; /* Tamaño más grande para pantallas medianas */
+    height: 170px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    width: 150px; /* Tamaño para pantallas grandes */
+    height: 200px;
+  }
+}
+
+      @font-face {
+        font-family: "insektofobiya"; /* El nombre que usarás para la fuente */
+        src: url("../assets/fonts/insektofobiya.ttf") format("truetype"); /* Ruta al archivo TTF */
+        font-weight: normal; /* Puedes ajustar esto si necesitas diferentes pesos */
+        font-style: normal; /* Puedes ajustar esto si necesitas diferentes estilos */
+      }
+
+      h1 {
+        font-family: "insektofobiya"; /* Asegúrate de que la fuente esté correctamente definida */
+        color: rgb(3, 111, 199); /* Cambia el color del texto a gris */
+        text-shadow: 1px 1px 0px black,
+      }
+
+      .modal{
+        background-image: url('../assets/background/fondo.jpg');
+      background-size: cover;
+      background-position: center;
+
+      }
+
+      /* Ajusta la posición de los íconos y botones */
+.info-container,
+.controls-container {
+  margin-top: 1rem; /* Reduce el espacio superior */
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5rem; /* Espaciado entre los íconos y botones */
+}
+
+/* Aumentar el tamaño de los íconos y botones */
+.info-container div,
+.controls-container button {
+  width: 60px; /* Aumentar el tamaño del contenedor */
+  height: 60px;
+}
+
+.info-container i,
+.controls-container i {
+  font-size: 1.5rem; /* Aumentar el tamaño de los íconos */
+}
+
+.info-container span,
+.controls-container span {
+  font-size: 1.25rem; /* Aumentar el tamaño del texto */
+}
+
+/* Ajuste del tamaño en pantallas más grandes */
+@media (min-width: 768px) {
+  .info-container div,
+  .controls-container button {
+    width: 70px;
+    height: 70px;
+  }
+
+  .info-container i,
+  .controls-container i {
+    font-size: 1.75rem;
+  }
+
+  .info-container span,
+  .controls-container span {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .info-container div,
+  .controls-container button {
+    width: 80px;
+    height: 80px;
+  }
+
+  .info-container i,
+  .controls-container i {
+    font-size: 2rem;
+  }
+
+  .info-container span,
+  .controls-container span {
+    font-size: 1.75rem;
+  }
+}
+
+      
+
+      
+    </style>
+  </head>
+  <body
+    class="bg-gray-100 flex flex-col items-center justify-center min-h-screen relative"
+  >
+    <h1 class="text-4xl font-bold mb-5 text-center p-5">
+      Adivina las Especies Endémicas de Nariño
+    </h1>
+
+    <!-- Contenedor de especies descubiertas -->
+    <div id="discovered-species"></div>
+
+    <!-- Tablero de juego -->
+    <div id="game-board">
+      <!-- Las tarjetas se generarán aquí -->
+    </div>
+
+ <!-- Modal emergente -->
+<div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden"></div>
+<div
+  id="modal"
+  class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden"
+>
+  <div
+    class="bg-white rounded-lg shadow-lg w-full max-w-lg p-5 relative modal"
+  
+  >
+    <!-- Fondo oscuro superpuesto -->
+    <div class="modal"></div>
+    
+    <!-- Contenido del modal -->
+    <div class="relative z-10">
+      <!-- Título de la especie -->
+      <h2 id="species-name" class="text-xl font-semibold mb-2 text-center text-black">
+        Oso de Anteojos
+      </h2>
+      <!-- Iframe para el video -->
+      <div class="mb-2">
+        <iframe
+          id="species-video"
+          width="100%"
+          height="200"
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          src=""
+        ></iframe>
+      </div>
+      <!-- Descripción de la especie -->
+      <p id="species-info" class="text-black mb-2 text-center">
+        El oso de anteojos es una especie de oso endémica de los Andes.
+      </p>
+      <!-- Botón para cerrar el modal -->
+      <button
+        class="bg-green-500 text-white rounded py-2 px-4 mt-3 w-full"
+        onclick="closeModal()"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+  <!-- Íconos informativos -->
+  <div class="info-container flex justify-around  ">
+    <div class="bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center">
+      <i class="fas fa-trophy"></i>
+      <span id="score" class="ml-2">0</span>
+    </div>
+    <div class="bg-red-500 text-white rounded-full w-12 h-12 flex items-center justify-center">
+      <i class="fas fa-heart"></i>
+      <span id="lives" class="ml-2">100</span>
+    </div>
+    <div class="bg-yellow-500 text-white rounded-full w-12 h-12 flex items-center justify-center">
+      <i class="fas fa-gamepad"></i>
+      <span id="level" class="ml-2">1</span>
+    </div>
+  </div>
+
+  <!-- Botones interactivos -->
+  <div class="controls-container flex justify-around mt-4">
+    <button
+      class="bg-blue-500 text-white rounded-full py-2 px-4 flex items-center"
+      onclick="toggleVolume()"
+    >
+      <i id="volume-icon" class="fas fa-volume-up"></i>
+    </button>
+
+    <button
+      class="bg-blue-500 text-white rounded-full py-2 px-4 flex items-center"
+      onclick="toggleFullscreen()"
+    >
+      <i id="fullscreen-icon" class="fas fa-expand-arrows-alt"></i>
+    </button>
+  </div>
+</div>
+</div>
+    <script>
+      const speciesData = [
+        {
+          name: "Curiquinga",
+          image: "../assets/img/Curiquinga.png",
+          description:
+            "El curiquinga es un ave rapaz de gran tamaño que habita en los páramos andinos.",
+          sound: "https://www.youtube.com/embed/LZxP7_AlzXU?si=V3fEKLDbzEqNohEs",
+        },
+        {
+          name: "Oso de Anteojos",
+          image: "../assets/img/oso.png",
+          description:
+            "El oso de anteojos es una especie de oso endémica de los Andes.",
+          sound: "https://www.youtube.com/embed/ACSQ69Ybiwo?si=VlhDE_xdpPglNgR_" 
+        },
+        {
+          name: "Tirapuentes",
+          image: "../assets/img/tirapuentes.png",
+          description:
+            "El tirapuentes es conocido por su gran pico y su comportamiento social, a menudo seen en grupos.",
+          sound: "https://www.youtube.com/embed/vlWaQMediRA?si=RHEn1kyXtVbeyGsk",
+        },
+        {
+          name: "Venado de Cola Blanca",
+          image: "../assets/img//venado.png",
+          description:
+            "El venado de cola blanca es un ciervo ampliamente distribuido en América, conocido por su agilidad.",
+          sound: "https://www.youtube.com/embed/fC8XeUjC9f8?si=87ecvWgmRgmI01zU",
+        },
+        {
+          name: "Danta",
+          image: "../assets/img/danta.png",
+          description:
+            "La danta es un mamífero grande que habita en los bosques y páramos, conocido por su trompa distintiva.",
+          sound: "https://www.youtube.com/embed/iXY2pWnS7ZY?si=mX4w_mOhBeWT2kRX",
+        },
+        {
+          name: "Águila Crestada",
+          image: "../assets/img/aguila.png",
+          description:
+            "El águila crestada es una ave de presa poderosa, conocida por su gran tamaño y habilidades de caza.",
+          sound: "https://www.youtube.com/embed/PoZn7eIMGvU?si=59WZMxQsSKkbg3R2",
+        },
+      ];
+
+      const especiesDataDos = [
+        {
+          name: "Buhito Nubicola",
+          image: "https://example.com/buhito.jpg",
+          description:
+            "El buhito nubicola es un pequeño búho que habita en los bosques nublados.",
+          sound: "https://example.com/sound_buhito.mp3",
+        },
+        {
+          name: "Perico Paramuno",
+          image: "https://example.com/perico.jpg",
+          description:
+            "El perico paramuno es un loro colorido que habita en los bosques.",
+          sound: "https://example.com/sound_perico.mp3",
+        },
+        {
+          name: "Rana Tigre",
+          image: "https://example.com/rana.jpg",
+          description:
+            "La rana tigre es una rana endémica de los Andes con un patrón distintivo de manchas.",
+          sound: "https://example.com/sound_rana.mp3",
+        },
+        {
+          name: "Colibrí",
+          image: "https://example.com/colibri.jpg",
+          description:
+            "El colibrí es un pequeño pájaro conocido por su habilidad para volar.",
+          sound: "https://example.com/sound_colibri.mp3",
+        },
+        {
+          name: "Churuco",
+          image: "https://example.com/churuco.jpg",
+          description:
+            "El churuco es un primate que habita en los bosques andinos.",
+          sound: "https://example.com/sound_churuco.mp3",
+        },
+        {
+          name: "Tucán Verde",
+          image: "https://example.com/tucan.jpg",
+          description:
+            "El tucán verde es un ave de gran pico que se encuentra en los bosques.",
+          sound: "https://example.com/sound_tucan.mp3",
+        },
+        {
+          name: "Jaguar",
+          image: "https://example.com/jaguar.jpg",
+          description: "El jaguar es el tercer felino más grande del mundo.",
+          sound: "https://example.com/sound_jaguar.mp3",
+        },
+        {
+          name: "Terlaque de Nariño",
+          image: "https://example.com/terlaque.jpg",
+          description:
+            "La terlaque de Nariño es una especie de ave que se encuentra en los Andes.",
+          sound: "https://example.com/sound_terlaque.mp3",
+        },
+      ];
+      let level = 1;
+      let score = 0;
+      let lives = 100;
+      let firstCard = null;
+      let secondCard = null;
+      let volumeOn = true;
+      let audio = new Audio("../assets/audios/naturaleza.mp3");
+      const discoveredSpecies = []; // Especies descubiertas
+
+      let cards = [...speciesData, ...speciesData].sort(
+        () => 0.5 - Math.random()
+      );
+
+      function createCard(species) {
+        const card = document.createElement("div");
+        card.classList.add(
+          "card",
+          "w-36",
+          "h-36",
+          "md:w-32",
+          "md:h-32",
+          "lg:w-36",
+          "lg:h-36",
+          "relative"
+        );
+        card.innerHTML = `
+            <div class="card-inner">
+                <div class="card-front flex items-center justify-center">
+                    <img src="../assets/background/trasera.jpeg" alt="Reverso" class="rounded">
+                </div>
+                <div class="card-back flex items-center justify-center">
+                    <img src="${species.image}" alt="${species.name}" class="rounded">
+                </div>
+            </div>
+        `;
+        card.addEventListener("click", () => flipCard(card, species));
+        return card;
+      }
+
+      function flipCard(card, species) {
+        if (firstCard && secondCard) return;
+
+        card.classList.add("flipped");
+
+        if (!firstCard) {
+          firstCard = { element: card, species };
+        } else if (!secondCard) {
+          secondCard = { element: card, species };
+          setTimeout(checkForMatch, 1000);
+        }
+      }
+
+ // Función para comprobar si hay coincidencia
+function checkForMatch() {
+    if (firstCard.species.name === secondCard.species.name) {
+        score += 10;
+        document.getElementById("score").innerText = score;
+        showDiscoveredSpecies(firstCard.species);
+
+        openModal({
+            species: firstCard.species.name,
+            image: firstCard.species.image,
+            description: firstCard.species.description,
+            sound: firstCard.species.sound,
+        });
+
+        firstCard.element.remove();
+        secondCard.element.remove();
+
+        firstCard = null;
+        secondCard = null;
+
+        const remainingCards = document.querySelectorAll(".card");
+
+        if (remainingCards.length === 0) {
+            level++;
+            document.getElementById("level").innerText = level;
+            initializeLevelTwo();
+        }
+    } else {
+        lives -= 10;
+        document.getElementById("lives").innerText = lives;
+
+        firstCard.element.classList.remove("flipped");
+        secondCard.element.classList.remove("flipped");
+        firstCard = null;
+        secondCard = null;
+
+        if (lives <= 0) {
+            alert("Has perdido el juego. Inténtalo de nuevo.");
+            resetGame();
+        }
+    }
+}
+
+// Función para abrir el modal con la información de la especie
+function openModal(data) {
+    const overlay = document.getElementById("overlay");
+    const modal = document.getElementById("modal");
+
+    // Mostrar el overlay y el modal al quitar la clase 'hidden'
+    overlay.classList.remove("hidden");
+    modal.classList.remove("hidden");
+
+    // Llenar el contenido del modal
+    document.getElementById("species-name").textContent = data.species;
+    document.getElementById("species-info").textContent = data.description; // Descripción
+
+    // Configurar el iframe para el video
+    const videoElement = document.getElementById("species-video");
+    videoElement.src = data.sound; // URL del video (anteriormente 'sound')
+}
+
+
+// Función para cerrar el modal
+function closeModal() {
+    document.getElementById("overlay").classList.add("hidden");
+    document.getElementById("modal").classList.add("hidden");
+}
+      function showDiscoveredSpecies(species) {
+        const discoveredContainer =
+          document.getElementById("discovered-species");
+        const discoveredCard = document.createElement("div");
+        discoveredCard.classList.add("discovered-card");
+        discoveredCard.innerHTML = `
+            <img src="${species.image}" alt="${species.name}">
+            <p class="text-center p-5">${species.name}</p>
+        `;
+        discoveredSpecies.push(discoveredCard);
+        discoveredContainer.appendChild(discoveredCard);
+      }
+
+      function initializeLevelTwo() {
+        const discoveredContainer =
+          document.getElementById("discovered-species");
+        discoveredContainer.innerHTML = "";
+        cards = [...especiesDataDos, ...especiesDataDos].sort(
+          () => 0.5 - Math.random()
+        );
+        const gameBoard = document.getElementById("game-board");
+        gameBoard.innerHTML = "";
+        cards.forEach((species) => gameBoard.appendChild(createCard(species)));
+      }
+
+      // Repetir el audio al terminar
+      audio.addEventListener("ended", function () {
+        audio.currentTime = 0; // Reinicia el audio al inicio
+        if (volumeOn) {
+          audio.play(); // Reproduce el audio nuevamente si el volumen está encendido
+        }
+      });
+
+      function toggleVolume() {
+        // Alternar el estado del volumen
+        volumeOn = !volumeOn;
+
+        // Reproducir o pausar el audio según el estado
+        if (volumeOn) {
+          audio.play(); // Reproduce el audio
+        } else {
+          audio.pause(); // Pausa el audio
+          audio.currentTime = 0; // Reinicia el audio al inicio (opcional)
+        }
+
+        // Cambiar el icono del volumen según el estado
+        document
+          .getElementById("volume-icon")
+          .classList.toggle("fa-volume-up", volumeOn);
+        document
+          .getElementById("volume-icon")
+          .classList.toggle("fa-volume-mute", !volumeOn);
+      }
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+
+      function resetGame() {
+        lives = 100;
+        score = 0;
+        document.getElementById("score").innerText = score;
+        document.getElementById("lives").innerText = lives;
+        initializeGame();
+      }
+
+      function initializeGame() {
+        const gameBoard = document.getElementById("game-board");
+        gameBoard.innerHTML = "";
+        cards.forEach((species) => gameBoard.appendChild(createCard(species)));
+      }
+
+      initializeGame();
+    </script>
+  </body>
+</html>
