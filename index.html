@@ -283,8 +283,35 @@
       <i id="fullscreen-icon" class="fas fa-expand-arrows-alt"></i>
     </button>
   </div>
+  <a href="#" onclick="openModal2()">Copyright e imagen atribución</a>
+  <div class="fixed z-10 inset-0 overflow-y-auto" hidden id="Copyright">
+
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">      
+        <p>The images used in this game are licensed from the following sources:</p>
+        <ul class="list-disc pl-6 mb-4">
+          <li><a href="https://es.m.wikipedia.org/wiki/Archivo:Carunculated_caracara_2.jpg" class="text-blue-500 hover:text-blue-700">Curiquinga</a></li>
+          <li><a href="https://colombia.inaturalist.org/taxa/41657-Tremarctos-ornatus" class="text-blue-500 hover:text-blue-700">Oso de Anteojos</a></li>
+          <li><a href="https://es.wikipedia.org/wiki/Semnornis_ramphastinus" class="text-blue-500 hover:text-blue-700">Tirapuentes</a></li>
+          <li><a href="https://es.wikipedia.org/wiki/Odocoileus_ustus" class="text-blue-500 hover:text-blue-700">Venado de Cola Blanca</a></li>
+          <li><a href="https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Tapirus_pinchaque_portrait.jpg/1200px-Tapirus_pinchaque_portrait.jpg" class="text-blue-500 hover:text-blue-700">Danta</a></li>
+          <li><a href="https://www.radionacional.co/actualidad/medioambiente/aguila-crespada-peligro-extincion-ninos-huila-fundacion-pajareritos" class="text-blue-500 hover:text-blue-700">Águila Crestada</a></li>
+          <li><a href="https://cl.pinterest.com/pin/31243791147744284/" class="text-blue-500 hover:text-blue-700">Buhito Nubicola</a></li>
+          <li><a href="https://www.inaturalist.org/guide_taxa/1975707" class="text-blue-500 hover:text-blue-700">Perico Paramuno</a></li>
+          <li><a href="https://www.researchgate.net/figure/Adult-female-Hyloscirtus-tigrinus-ICN-54635-629-mm-SVL-from-Laguna-de-la-Magdalena_fig1_40665173" class="text-blue-500 hover:text-blue-700">Rana Tigre</a></li>
+          <li><a href="https://es.wikipedia.org/wiki/Coeligena_torquata" class="text-blue-500 hover:text-blue-700">Colibrí</a></li>
+          <li><a href="https://es.wikipedia.org/wiki/Lagothrix" class="text-blue-500 hover:text-blue-700">Churuco</a></li>
+          <li><a href="https://www.facebook.com/birdtripsecuador/posts/en-gray-breasted-mountain-toucan-es-tuc%C3%A1n-andino-pechigrisbn-andigena-hypoglauca/389921002554950/" class="text-blue-500 hover:text-blue-700">Tucán Verde</a></li>
+          <li><a href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Jaguar_(Panthera_onca_palustris)_female_Piquiri_River_2.JPG/1200px-Jaguar_(Panthera_onca_palustris)_female_Piquiri_River_2.JPG" class="text-blue-500 hover:text-blue-700">Jaguar</a></li>
+        </ul>
+        <div class="flex justify-end">
+          <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded" onclick="closeModal2()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
+    
     <script>
       const speciesData = [
         {
@@ -433,6 +460,8 @@
         }
       }
 
+      
+      
  // Función para comprobar si hay coincidencia
 function checkForMatch() {
     if (firstCard.species.name === secondCard.species.name) {
@@ -575,9 +604,21 @@ function closeModal() {
         const gameBoard = document.getElementById("game-board");
         gameBoard.innerHTML = "";
         cards.forEach((species) => gameBoard.appendChild(createCard(species)));
+
+        
+
       }
 
       initializeGame();
+
+      function openModal2() {
+      document.getElementById('Copyright').removeAttribute('hidden');
+      }
+
+      function closeModal2() {
+      document.getElementById('Copyright').setAttribute('hidden', true);
+      }
+
     </script>
   </body>
 </html>
